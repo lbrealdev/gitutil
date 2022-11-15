@@ -1,9 +1,9 @@
 name: gitutil-migrate-repository
-run-name: Deploy to ${{ inputs.deploy_target }} by @${{ github.actor }}
+run-name: Migrate by @${{ github.actor }}
 on:
   push:
     branches:
-      - main
+      - '**.sh'
 
 jobs:
   gitutil-run:
