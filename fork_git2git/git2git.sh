@@ -21,13 +21,13 @@ function check_gitlab_repository() {
 }
 
 function check_github_repository() {
-  curl -s -H "Authorization: token ${GITHUB_AUTH_TOKEN}" \
+  curl -s -H "Authorization: token ${GH_AUTH_TOKEN}" \
     "${GITHUB_API_URL}/repos/${GITHUB_USER}/${GITHUB_PROJECT_NAME}" | jq -r \
     'if .message == "Not Found" then "404" elif .message == "Bad credentials" then "401" else "200" end'
 }
 
 function create_github_repository() {
-  curl -s -H "Authorization: token ${GITHUB_AUTH_TOKEN}" \
+  curl -s -H "Authorization: token ${GH_AUTH_TOKEN}" \
      -d "{
          \"name\": \"${GITHUB_PROJECT_NAME}\",
          \"auto_init\": \"true\",
@@ -38,7 +38,7 @@ function create_github_repository() {
 }
 
 function git_clone() {
-  GITHUB_CLONE_URL=$(curl -s -H "Authorization: token ${GITHUB_AUTH_TOKEN}" "${GITHUB_API_URL}/repos/${GITHUB_USER}/${GITHUB_PROJECT_NAME}" | jq -r '.clone_url' | sed -E 's/https:\/\//https:\/\/'"$GITHUB_AUTH_TOKEN"'@/')
+  GITHUB_CLONE_URL=$(curl -s -H "Authorization: token ${GH_AUTH_TOKEN}" "${GITHUB_API_URL}/repos/${GITHUB_USER}/${GITHUB_PROJECT_NAME}" | jq -r '.clone_url' | sed -E 's/https:\/\//https:\/\/'"$GH_AUTH_TOKEN"'@/')
   mkdir migration && cd migration || exit
   git clone "$GITHUB_CLONE_URL" -q
   cd "$GITHUB_PROJECT_NAME" || exit
@@ -61,7 +61,7 @@ function git_migrate() {
   git_master_to_main
   cd ../.. ; rm -rf migration
   echo "New repository created in Github ${GITHUB_USER}"
-  echo "Repository URL: $(curl -s -H "Authorization: token ${GITHUB_AUTH_TOKEN}" "${GITHUB_API_URL}/repos/${GITHUB_USER}/${GITHUB_PROJECT_NAME}" | jq -r '.html_url')"
+  echo "Repository URL: $(curl -s -H "Authorization: token ${GH_AUTH_TOKEN}" "${GITHUB_API_URL}/repos/${GITHUB_USER}/${GITHUB_PROJECT_NAME}" | jq -r '.html_url')"
 }
 
 function main() {
