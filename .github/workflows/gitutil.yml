@@ -2,7 +2,7 @@ name: gitutil-migrate-repository
 run-name: Migrate by @${{ github.actor }}
 on:
   push:
-    branches:
+    paths:
       - '**.sh'
 
 jobs:
