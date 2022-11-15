@@ -44,22 +44,22 @@ function git_clone() {
   cd "$GITHUB_PROJECT_NAME" || exit
 }
 
+function git_master_to_main() {
+  git pull -q ; git checkout master -q
+  git push origin master:main --force-with-lease -q
+  git branch -f main origin/main -q
+  git push origin --delete master -q ; git checkout main -q
+}
+
 function git_migrate() {
-  # Clone and pushing the source repository (Gitlab) for syncing into new repository (Github)
   GITLAB_CLONE_URL=$(curl -s -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" "${GITLAB_API_URL}/${GITLAB_PROJECT_ID}" | jq -r '.http_url_to_repo' | sed -E 's/https:\/\//https:\/\/'"$GITLAB_USER"':'"$GITLAB_AUTH_TOKEN"'@/')
   git clone --bare "$GITLAB_CLONE_URL" -q
   BARE_REPO=$(echo "$GITLAB_CLONE_URL" | grep -oE '(/[^/]+){1}$' | cut -d "/" -f 2)
   cd "$BARE_REPO" || exit
   git push --mirror "$GITHUB_CLONE_URL" -q |& : || true
   cd ..
-  git pull -q
-  git checkout master -q
-  git push origin master:main --force-with-lease -q
-  git branch -f main origin/main -q
-  git push origin --delete master -q
-  git checkout main -q
-  cd ../..
-  rm -rf migration
+  git_master_to_main
+  cd ../.. ; rm -rf migration
   echo "New repository created in Github ${GITHUB_USER}"
   echo "Repository URL: $(curl -s -H "Authorization: token ${GITHUB_AUTH_TOKEN}" "${GITHUB_API_URL}/repos/${GITHUB_USER}/${GITHUB_PROJECT_NAME}" | jq -r '.html_url')"
 }
