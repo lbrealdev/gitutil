@@ -12,7 +12,7 @@ GITLAB_PROJECT_NAME=$(curl -s -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" "${GITLAB
 # Github variables
 GITHUB_API_URL="https://api.github.com"
 GITHUB_USER="lbrealdev"
-GITHUB_PROJECT_NAME="reposity-$GITLAB_PROJECT_NAME-migrate"
+GITHUB_PROJECT_NAME="reposity-$GITLAB_PROJECT_NAME-test"
 
 # Check if the repository exists in gitlab.
 function check_gitlab_repository() {
