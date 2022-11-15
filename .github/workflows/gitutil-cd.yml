@@ -5,7 +5,7 @@ on:
       - main
 
 jobs:
-  python-ci:
+  gitutil-run:
     
     runs-on: ubuntu-latest
 
@@ -16,5 +16,5 @@ jobs:
 
       - name: Run script
         run: |
-          echo "TEST WORKFLOWS"
+          echo "Running script ..."
           ls -lthr
