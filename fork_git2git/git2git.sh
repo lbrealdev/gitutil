@@ -4,18 +4,19 @@
 set -euo pipefail
 
 # Gitlab variables
-GITLAB_API_URL="https://gitlab.com/api/v4"
+GITLAB_API_URL="https://gitlab.com/api/v4/projects"
 GITLAB_PROJECT_ID="$PROJECT_ID"
 GITLAB_USER="akae_beka"
+GITLAB_PROJECT_NAME=$(curl -s -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" "${GITLAB_API_URL}/${GITLAB_PROJECT_ID}" | jq -r '.name')
 
 # Github variables
 GITHUB_API_URL="https://api.github.com"
 GITHUB_USER="lbrealdev"
-GITHUB_PROJECT_NAME="git-$PROJECT_SUFFIX-test"
+GITHUB_PROJECT_NAME="reposity-$GITLAB_PROJECT_NAME-migrate"
 
 # Check if the repository exists in gitlab.
 function check_gitlab_repository() {
-  curl -s -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}" | jq -r \
+  curl -s -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" "${GITLAB_API_URL}/${GITLAB_PROJECT_ID}" | jq -r \
     'if .message == "404 Project Not Found" then "404" elif .message == "401 Unauthorized" then "401" else "200" end'
 }
 
@@ -45,10 +46,10 @@ function git_clone() {
 
 function git_migrate() {
   # Clone and pushing the source repository (Gitlab) for syncing into new repository (Github)
-  GITLAB_CLONE_URL=$(curl -s -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" "${GITLAB_API_URL}/projects/${GITLAB_PROJECT_ID}" | jq -r '.http_url_to_repo' | sed -E 's/https:\/\//https:\/\/'"$GITLAB_USER"':'"$GITLAB_AUTH_TOKEN"'@/')
+  GITLAB_CLONE_URL=$(curl -s -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" "${GITLAB_API_URL}/${GITLAB_PROJECT_ID}" | jq -r '.http_url_to_repo' | sed -E 's/https:\/\//https:\/\/'"$GITLAB_USER"':'"$GITLAB_AUTH_TOKEN"'@/')
   git clone --bare "$GITLAB_CLONE_URL" -q
   BARE_REPO=$(echo "$GITLAB_CLONE_URL" | grep -oE '(/[^/]+){1}$' | cut -d "/" -f 2)
-  cd "$BARE_REPO"
+  cd "$BARE_REPO" || exit
   git push --mirror "$GITHUB_CLONE_URL" -q |& : || true
   cd ..
   git pull -q
