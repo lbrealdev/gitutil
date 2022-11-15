@@ -4,7 +4,7 @@
 set -euo pipefail
 #trap cleanup SIGINT SIGTERM ERR EXIT
 
-SCRIPT_BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+# SCRIPT_BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
 # gitlab variables
 GITLAB_API_URL="https://gitlab.com/api/v4/projects"

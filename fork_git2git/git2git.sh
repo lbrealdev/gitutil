@@ -58,7 +58,7 @@ function git_migrate() {
   git push origin --delete master -q
   git checkout main -q
   cd ../..
-  find . -maxdepth 1 -mindepth 1 -type d -exec rm -rf '{}' \;
+  rm -rf migration
   echo "New repository created in Github ${GITHUB_USER}"
   echo "Repository URL: $(curl -s -H "Authorization: token ${GITHUB_AUTH_TOKEN}" "${GITHUB_API_URL}/repos/${GITHUB_USER}/${GITHUB_PROJECT_NAME}" | jq -r '.html_url')"
 }
