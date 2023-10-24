@@ -12,29 +12,33 @@ GITLAB_PROJECT_NAME=$(curl -s -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" "${GITLAB
 # Github variables
 GITHUB_API_URL="https://api.github.com"
 GITHUB_USER="lbrealdev"
-GITHUB_PROJECT_NAME="reposity-$GITLAB_PROJECT_NAME-test"
+GITHUB_PROJECT_NAME="$GITLAB_PROJECT_NAME-migrated-repository"
 
 # Check if the repository exists in gitlab.
 function check_gitlab_repository() {
-  curl -s -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" "${GITLAB_API_URL}/${GITLAB_PROJECT_ID}" | jq -r \
-    'if .message == "404 Project Not Found" then "404" elif .message == "401 Unauthorized" then "401" else "200" end'
+  curl \
+    -H "PRIVATE-TOKEN: ${GITLAB_AUTH_TOKEN}" \
+    -s "${GITLAB_API_URL}/${GITLAB_PROJECT_ID}" \
+    | jq -r 'if .message == "404 Project Not Found" then "404" elif .message == "401 Unauthorized" then "401" else "200" end'
 }
 
 function check_github_repository() {
-  curl -s -H "Authorization: token ${GH_AUTH_TOKEN}" \
-    "${GITHUB_API_URL}/repos/${GITHUB_USER}/${GITHUB_PROJECT_NAME}" | jq -r \
-    'if .message == "Not Found" then "404" elif .message == "Bad credentials" then "401" else "200" end'
+  curl \
+    -H "Authorization: token ${GH_AUTH_TOKEN}" \
+    -s "${GITHUB_API_URL}/repos/${GITHUB_USER}/${GITHUB_PROJECT_NAME}" \
+    | jq -r 'if .message == "Not Found" then "404" elif .message == "Bad credentials" then "401" else "200" end'
 }
 
 function create_github_repository() {
-  curl -s -H "Authorization: token ${GH_AUTH_TOKEN}" \
-     -d "{
+  curl \
+    -H "Authorization: token ${GH_AUTH_TOKEN}" \
+    -s "${GITHUB_API_URL}/user/repos" \
+    -d "{
          \"name\": \"${GITHUB_PROJECT_NAME}\",
          \"auto_init\": \"true\",
          \"private\": \"true\"
        }" \
-     "${GITHUB_API_URL}/user/repos" \
-     -o /dev/null
+    -o /dev/null
 }
 
 function git_clone() {
